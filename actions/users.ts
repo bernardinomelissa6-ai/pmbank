@@ -1,24 +1,20 @@
 "use server";
 
-import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdminAction } from "@/lib/auth-guards";
 import type { ProfileStatus, Role } from "@/types/database";
 
-function generateTempPassword(): string {
-  return crypto.randomBytes(9).toString("base64").replace(/[/+=]/g, "8");
-}
-
-export async function createHouseholdUser(input: { name: string; email: string }) {
+export async function createHouseholdUser(input: { name: string; email: string; password: string }) {
   const profile = await requireAdminAction();
+  if (input.password.length < 6) return { error: "A senha precisa ter pelo menos 6 caracteres." };
+
   const admin = createAdminClient();
-  const tempPassword = generateTempPassword();
 
   const { data: userData, error: userError } = await admin.auth.admin.createUser({
     email: input.email,
-    password: tempPassword,
+    password: input.password,
     email_confirm: true,
   });
   if (userError || !userData.user) {
@@ -39,7 +35,7 @@ export async function createHouseholdUser(input: { name: string; email: string }
   }
 
   revalidatePath("/usuarios");
-  return { tempPassword };
+  return {};
 }
 
 export async function updateUserRole(profileId: string, role: Role) {

@@ -12,10 +12,9 @@ import type { Profile } from "@/types/database";
 export function UsuariosClient({ currentProfileId, members }: { currentProfileId: string; members: Profile[] }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tempPassword, setTempPassword] = useState<{ email: string; password: string } | null>(null);
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
@@ -23,12 +22,11 @@ export function UsuariosClient({ currentProfileId, members }: { currentProfileId
     setIsSubmitting(true);
     const result = await createHouseholdUser(form);
     setIsSubmitting(false);
-    if (result.error || !result.tempPassword) {
-      setError(result.error ?? "Não foi possível criar o usuário.");
+    if (result.error) {
+      setError(result.error);
       return;
     }
-    setTempPassword({ email: form.email, password: result.tempPassword });
-    setForm({ name: "", email: "" });
+    setForm({ name: "", email: "", password: "" });
     setCreateOpen(false);
     router.refresh();
   }
@@ -122,6 +120,15 @@ export function UsuariosClient({ currentProfileId, members }: { currentProfileId
             value={form.email}
             onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
           />
+          <Input
+            label="Senha"
+            type="text"
+            required
+            minLength={6}
+            hint="A pessoa já entra direto com esse e-mail e senha. Pode trocar depois em Configurações."
+            value={form.password}
+            onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+          />
           {error ? <p className="text-sm text-negative">{error}</p> : null}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>
@@ -132,23 +139,6 @@ export function UsuariosClient({ currentProfileId, members }: { currentProfileId
             </Button>
           </div>
         </form>
-      </Modal>
-
-      <Modal open={tempPassword !== null} onClose={() => setTempPassword(null)} title="Usuário criado">
-        {tempPassword ? (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-text-secondary">
-              Repasse estas credenciais para <strong>{tempPassword.email}</strong>. A senha não será exibida novamente.
-            </p>
-            <div className="rounded-[var(--radius-control)] bg-slate-50 p-3 font-mono text-sm text-text-primary">
-              {tempPassword.password}
-            </div>
-            <p className="text-xs text-text-secondary">
-              Recomende que a pessoa troque a senha assim que fizer login, em Configurações.
-            </p>
-            <Button onClick={() => setTempPassword(null)}>Entendi</Button>
-          </div>
-        ) : null}
       </Modal>
     </div>
   );
