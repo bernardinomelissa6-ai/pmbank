@@ -7,22 +7,14 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   const supabase = await createClient();
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
-  if (!user) {
-    console.error("[auth-debug] no user from getUser()", userError?.message);
-    return null;
-  }
+  if (!user) return null;
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle();
-
-  if (!profile) {
-    console.error("[auth-debug] user found but no profile row", user.id, profileError?.message);
-  }
 
   return (profile as Profile) ?? null;
 }
