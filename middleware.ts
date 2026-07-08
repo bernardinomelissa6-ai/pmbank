@@ -1,44 +1,32 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/setup"];
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
+/**
+ * Checagem "otimista": só olha se existe o cookie de sessão do Supabase, sem validar o
+ * token. Evita importar @supabase/ssr no Edge Runtime (essa importação puxa o SDK
+ * completo, incluindo o cliente de realtime, que quebra o bundle do middleware com
+ * "ReferenceError: __dirname is not defined" — bug conhecido do Next.js ao empacotar
+ * dependências do supabase-js para o Edge). A validação de verdade acontece nas páginas,
+ * via requireProfile()/getCurrentProfile() (lib/auth-guards.ts), que rodam em runtime
+ * Node.js normal e chamam supabase.auth.getUser() de verdade.
+ */
+function hasSupabaseSessionCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token"));
+}
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublicPath = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  const hasSession = hasSupabaseSessionCookie(request);
 
-  if (!user && !isPublicPath) {
+  if (!hasSession && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && (pathname === "/login" || pathname === "/setup")) {
+  if (hasSession && (pathname === "/login" || pathname === "/setup")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
@@ -46,11 +34,11 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/") {
     const url = request.nextUrl.clone();
-    url.pathname = user ? "/dashboard" : "/login";
+    url.pathname = hasSession ? "/dashboard" : "/login";
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
