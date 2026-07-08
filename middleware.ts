@@ -20,15 +20,13 @@ export function middleware(request: NextRequest) {
   const isPublicPath = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
   const hasSession = hasSupabaseSessionCookie(request);
 
+  // Nunca redireciona PARA FORA de /login ou /setup aqui com base só no cookie — se o
+  // cookie existir mas estiver expirado/inválido, a página de destino (validação real via
+  // requireProfile) mandaria de volta pro /login, causando loop infinito de redirecionamento.
+  // Essas páginas fazem sua própria checagem real e redirecionam para /dashboard se for o caso.
   if (!hasSession && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  if (hasSession && (pathname === "/login" || pathname === "/setup")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

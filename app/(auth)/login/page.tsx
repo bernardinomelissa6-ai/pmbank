@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth-guards";
 import { LoginForm } from "./LoginForm";
 
 export default async function LoginPage() {
+  const profile = await getCurrentProfile();
+  if (profile && profile.status === "active") redirect("/dashboard");
+
   const supabase = await createClient();
   const { data: hasAdmin } = await supabase.rpc("system_has_admin");
 
