@@ -46,6 +46,7 @@ export function ConfiguracoesClient({
   const [categoryFormOpen, setCategoryFormOpen] = useState(false);
   const [categoryFormType, setCategoryFormType] = useState<"income" | "expense">("expense");
   const [editingCategory, setEditingCategory] = useState<CategoryFormInitialValues | undefined>(undefined);
+  const [categoryFormKey, setCategoryFormKey] = useState(0);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   async function handleSaveName(event: React.FormEvent) {
@@ -136,6 +137,7 @@ export function ConfiguracoesClient({
                   onClick={() => {
                     setCategoryFormType("expense");
                     setEditingCategory(undefined);
+                    setCategoryFormKey((k) => k + 1);
                     setCategoryFormOpen(true);
                   }}
                 >
@@ -159,6 +161,7 @@ export function ConfiguracoesClient({
                         onClick={() => {
                           setCategoryFormType("expense");
                           setEditingCategory({ id: category.id, name: category.name, type: category.type, color: category.color ?? undefined });
+                          setCategoryFormKey((k) => k + 1);
                           setCategoryFormOpen(true);
                         }}
                       >
@@ -183,6 +186,7 @@ export function ConfiguracoesClient({
                   onClick={() => {
                     setCategoryFormType("income");
                     setEditingCategory(undefined);
+                    setCategoryFormKey((k) => k + 1);
                     setCategoryFormOpen(true);
                   }}
                 >
@@ -206,6 +210,7 @@ export function ConfiguracoesClient({
                         onClick={() => {
                           setCategoryFormType("income");
                           setEditingCategory({ id: category.id, name: category.name, type: category.type, color: category.color ?? undefined });
+                          setCategoryFormKey((k) => k + 1);
                           setCategoryFormOpen(true);
                         }}
                       >
@@ -230,7 +235,7 @@ export function ConfiguracoesClient({
       </SectionCard>
 
       <CategoryForm
-        key={editingCategory?.id ?? "new"}
+        key={categoryFormKey}
         open={categoryFormOpen}
         onClose={() => setCategoryFormOpen(false)}
         defaultType={categoryFormType}

@@ -14,6 +14,7 @@ export function MetasClient({ currentUserId, goals }: { currentUserId: string; g
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<GoalFormInitialValues | undefined>(undefined);
+  const [formKey, setFormKey] = useState(0);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   return (
@@ -26,6 +27,7 @@ export function MetasClient({ currentUserId, goals }: { currentUserId: string; g
         <Button
           onClick={() => {
             setEditing(undefined);
+            setFormKey((k) => k + 1);
             setFormOpen(true);
           }}
         >
@@ -51,6 +53,7 @@ export function MetasClient({ currentUserId, goals }: { currentUserId: string; g
                   deadline: goal.deadline,
                   is_shared: goal.is_shared,
                 });
+                setFormKey((k) => k + 1);
                 setFormOpen(true);
               }}
               onDelete={() => setPendingDeleteId(goal.id)}
@@ -59,7 +62,7 @@ export function MetasClient({ currentUserId, goals }: { currentUserId: string; g
         </div>
       )}
 
-      <GoalForm key={editing?.id ?? "new"} open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
+      <GoalForm key={formKey} open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

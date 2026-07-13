@@ -37,6 +37,7 @@ export function EntradasClient({
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<IncomeFormInitialValues | undefined>(undefined);
   const [editingRule, setEditingRule] = useState<IncomeRecurrence | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
   const recurrenceById = new Map(recurrences.map((rule) => [rule.id, rule]));
 
@@ -68,6 +69,7 @@ export function EntradasClient({
 
   function openCreate() {
     setEditing(undefined);
+    setFormKey((k) => k + 1);
     setFormOpen(true);
   }
 
@@ -94,6 +96,7 @@ export function EntradasClient({
       is_shared: income.is_shared,
       notes: income.notes,
     });
+    setFormKey((k) => k + 1);
     setFormOpen(true);
   }
 
@@ -137,7 +140,7 @@ export function EntradasClient({
       />
 
       <IncomeForm
-        key={editing?.id ?? "new"}
+        key={formKey}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         categories={categories}

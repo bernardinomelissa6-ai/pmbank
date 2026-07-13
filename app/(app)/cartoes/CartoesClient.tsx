@@ -34,6 +34,7 @@ export function CartoesClient({
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CardFormInitialValues | undefined>(undefined);
+  const [formKey, setFormKey] = useState(0);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   return (
@@ -47,6 +48,7 @@ export function CartoesClient({
           <Button
             onClick={() => {
               setEditing(undefined);
+              setFormKey((k) => k + 1);
               setFormOpen(true);
             }}
           >
@@ -85,6 +87,7 @@ export function CartoesClient({
                             closing_day: card.closing_day,
                             due_day: card.due_day,
                           });
+                          setFormKey((k) => k + 1);
                           setFormOpen(true);
                         }}
                       >
@@ -139,7 +142,7 @@ export function CartoesClient({
         </div>
       )}
 
-      <CardForm key={editing?.id ?? "new"} open={formOpen} onClose={() => setFormOpen(false)} accounts={accounts} initialValues={editing} />
+      <CardForm key={formKey} open={formOpen} onClose={() => setFormOpen(false)} accounts={accounts} initialValues={editing} />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

@@ -14,6 +14,7 @@ export function ContasClient({ accounts, isAdmin }: { accounts: Account[]; isAdm
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AccountFormInitialValues | undefined>(undefined);
+  const [formKey, setFormKey] = useState(0);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   return (
@@ -27,6 +28,7 @@ export function ContasClient({ accounts, isAdmin }: { accounts: Account[]; isAdm
           <Button
             onClick={() => {
               setEditing(undefined);
+              setFormKey((k) => k + 1);
               setFormOpen(true);
             }}
           >
@@ -56,6 +58,7 @@ export function ContasClient({ accounts, isAdmin }: { accounts: Account[]; isAdm
                     variant="secondary"
                     onClick={() => {
                       setEditing({ id: account.id, name: account.name, type: account.type, initial_balance: account.initial_balance });
+                      setFormKey((k) => k + 1);
                       setFormOpen(true);
                     }}
                   >
@@ -71,7 +74,7 @@ export function ContasClient({ accounts, isAdmin }: { accounts: Account[]; isAdm
         </div>
       )}
 
-      <AccountForm key={editing?.id ?? "new"} open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
+      <AccountForm key={formKey} open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

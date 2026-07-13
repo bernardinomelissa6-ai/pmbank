@@ -40,6 +40,7 @@ export function GastosClient({
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ExpenseFormInitialValues | undefined>(undefined);
+  const [formKey, setFormKey] = useState(0);
 
   const rows: TransactionRow[] = expenses.map((expense) => {
     const extraParts = [expense.card?.name, EXPENSE_TYPE_LABEL[expense.expense_type]].filter(Boolean);
@@ -61,6 +62,7 @@ export function GastosClient({
 
   function openCreate() {
     setEditing(undefined);
+    setFormKey((k) => k + 1);
     setFormOpen(true);
   }
 
@@ -79,6 +81,7 @@ export function GastosClient({
       payment_method: expense.payment_method,
       is_shared: expense.is_shared,
     });
+    setFormKey((k) => k + 1);
     setFormOpen(true);
   }
 
@@ -110,7 +113,7 @@ export function GastosClient({
       />
 
       <ExpenseForm
-        key={editing?.id ?? "new"}
+        key={formKey}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         categories={categories}
