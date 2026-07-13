@@ -61,3 +61,4 @@ npm run build   # build de produção (checa tipos)
 npm run start   # servir o build de produção
 npm run lint    # eslint
 ```
+
