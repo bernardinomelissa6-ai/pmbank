@@ -139,7 +139,7 @@ export function CartoesClient({
         </div>
       )}
 
-      <CardForm open={formOpen} onClose={() => setFormOpen(false)} accounts={accounts} initialValues={editing} />
+      <CardForm key={editing?.id ?? "new"} open={formOpen} onClose={() => setFormOpen(false)} accounts={accounts} initialValues={editing} />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

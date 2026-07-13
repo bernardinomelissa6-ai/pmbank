@@ -137,6 +137,7 @@ export function EntradasClient({
       />
 
       <IncomeForm
+        key={editing?.id ?? "new"}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         categories={categories}
@@ -146,6 +147,7 @@ export function EntradasClient({
 
       {editingRule ? (
         <RecurrenceEditForm
+          key={editingRule.id}
           open={editingRule !== null}
           onClose={() => setEditingRule(null)}
           categories={categories}

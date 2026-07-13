@@ -110,6 +110,7 @@ export function GastosClient({
       />
 
       <ExpenseForm
+        key={editing?.id ?? "new"}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         categories={categories}

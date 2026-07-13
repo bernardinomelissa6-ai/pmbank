@@ -71,7 +71,7 @@ export function ContasClient({ accounts, isAdmin }: { accounts: Account[]; isAdm
         </div>
       )}
 
-      <AccountForm open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
+      <AccountForm key={editing?.id ?? "new"} open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

@@ -59,7 +59,7 @@ export function MetasClient({ currentUserId, goals }: { currentUserId: string; g
         </div>
       )}
 
-      <GoalForm open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
+      <GoalForm key={editing?.id ?? "new"} open={formOpen} onClose={() => setFormOpen(false)} initialValues={editing} />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

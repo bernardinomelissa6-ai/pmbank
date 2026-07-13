@@ -230,6 +230,7 @@ export function ConfiguracoesClient({
       </SectionCard>
 
       <CategoryForm
+        key={editingCategory?.id ?? "new"}
         open={categoryFormOpen}
         onClose={() => setCategoryFormOpen(false)}
         defaultType={categoryFormType}
