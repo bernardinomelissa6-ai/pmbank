@@ -18,7 +18,7 @@ export async function createCard(input: CardInput) {
   const { error } = await supabase.from("cards").insert({
     household_id: profile.household_id,
     name: input.name,
-    account_id: input.account_id ?? null,
+    account_id: input.account_id || null,
     limit_amount: input.limit_amount ?? null,
     closing_day: input.closing_day ?? null,
     due_day: input.due_day ?? null,
@@ -32,7 +32,10 @@ export async function createCard(input: CardInput) {
 export async function updateCard(id: string, input: Partial<CardInput>) {
   await requireAdminAction();
   const supabase = await createClient();
-  const { error } = await supabase.from("cards").update(input).eq("id", id);
+  const { error } = await supabase
+    .from("cards")
+    .update({ ...input, account_id: input.account_id || null })
+    .eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/cartoes");
   return {};
