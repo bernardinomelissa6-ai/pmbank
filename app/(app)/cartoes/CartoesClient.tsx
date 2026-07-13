@@ -62,8 +62,9 @@ export function CartoesClient({
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {cards.map((card) => {
-            const usage = card.limit_amount ? (card.current_invoice_amount / card.limit_amount) * 100 : 0;
             const linked = expensesByCard[card.id] ?? [];
+            const currentInvoice = linked.reduce((sum, expense) => sum + expense.amount, 0);
+            const usage = card.limit_amount ? (currentInvoice / card.limit_amount) * 100 : 0;
             return (
               <div key={card.id} className="rounded-[var(--radius-card)] border border-border-subtle bg-surface p-5">
                 <div className="flex items-start justify-between">
@@ -102,7 +103,7 @@ export function CartoesClient({
 
                 <div className="mt-4">
                   <div className="flex items-baseline justify-between">
-                    <p className="text-2xl font-semibold text-text-primary">{formatCurrency(card.current_invoice_amount)}</p>
+                    <p className="text-2xl font-semibold text-text-primary">{formatCurrency(currentInvoice)}</p>
                     {card.limit_amount ? (
                       <p className="text-xs text-text-secondary">de {formatCurrency(card.limit_amount)}</p>
                     ) : null}

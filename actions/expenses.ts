@@ -102,8 +102,6 @@ export async function createExpense(input: ExpenseInput) {
       }))
     );
     if (installmentsError) return { error: installmentsError.message };
-  } else if (input.card_id) {
-    await supabase.rpc("increment_card_invoice", { p_card_id: input.card_id, p_delta: input.amount });
   }
 
   revalidateExpenseViews();
