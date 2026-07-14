@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDate, MONTH_NAMES } from "@/lib/format";
 import { Badge, STATUS_BADGE } from "@/components/ui/Badge";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { cn } from "@/lib/utils";
 
 export interface TransactionRow {
   id: string;
@@ -57,12 +58,9 @@ export function TransactionTable({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [pendingCancelRecurrenceId, setPendingCancelRecurrenceId] = useState<string | null>(null);
 
-  const monthOptions = useMemo(() => {
+  const monthKeys = useMemo(() => {
     const set = new Set(rows.map((row) => row.date.slice(0, 7)));
-    return Array.from(set)
-      .sort()
-      .reverse()
-      .map((value) => ({ value, label: formatMonthLabel(value) }));
+    return Array.from(set).sort();
   }, [rows]);
 
   const filteredRows = rows.filter((row) => {
@@ -97,12 +95,7 @@ export function TransactionTable({
           ariaLabel="Categoria"
           options={[{ value: "all", label: "Todas as categorias" }, ...categoryOptions]}
         />
-        <Dropdown
-          value={month}
-          onChange={setMonth}
-          ariaLabel="Mês"
-          options={[{ value: "all", label: "Todos os meses" }, ...monthOptions]}
-        />
+        <MonthStepper value={month} onChange={setMonth} months={monthKeys} />
       </div>
 
       {filteredRows.length === 0 ? (
@@ -267,9 +260,74 @@ function RowActions({
   );
 }
 
-function formatMonthLabel(value: string): string {
+function IconChevronLeft(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  );
+}
+
+function IconChevronRight(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+function monthLabel(value: string): string {
   const [year, month] = value.split("-").map(Number);
-  return new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(
-    new Date(year, month - 1, 1)
+  return `${MONTH_NAMES[month - 1]} ${year}`;
+}
+
+function MonthStepper({
+  value,
+  months,
+  onChange,
+}: {
+  value: string;
+  months: string[];
+  onChange: (value: string) => void;
+}) {
+  const activeKey = value !== "all" ? value : months[months.length - 1];
+  const index = activeKey ? months.indexOf(activeKey) : -1;
+  const canGoPrev = index > 0;
+  const canGoNext = index !== -1 && index < months.length - 1;
+
+  return (
+    <div className="flex h-11 items-center gap-1 rounded-full border border-border-subtle bg-surface p-1">
+      <button
+        type="button"
+        onClick={() => canGoPrev && onChange(months[index - 1])}
+        disabled={!canGoPrev}
+        aria-label="Mês anterior"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
+      >
+        <IconChevronLeft className="h-4 w-4" />
+      </button>
+      <span className="min-w-0 flex-1 truncate px-1 text-center text-xs font-medium text-text-primary">
+        {value === "all" ? "Todos os meses" : monthLabel(value)}
+      </span>
+      <button
+        type="button"
+        onClick={() => canGoNext && onChange(months[index + 1])}
+        disabled={!canGoNext}
+        aria-label="Próximo mês"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
+      >
+        <IconChevronRight className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange("all")}
+        className={cn(
+          "shrink-0 rounded-full px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+          value === "all" ? "bg-brand-blue text-white" : "bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/20"
+        )}
+      >
+        Todos
+      </button>
+    </div>
   );
 }
