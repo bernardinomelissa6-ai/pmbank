@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { PRIMARY_NAV, MORE_NAV } from "@/components/layout/nav-items";
 import { IconMenu, IconLogout } from "@/components/layout/icons";
 import { Modal } from "@/components/ui/Modal";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { signOutAction } from "@/actions/auth";
 import type { Role } from "@/types/database";
 
@@ -57,7 +58,7 @@ export function MobileBottomNav({ role }: { role: Role }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMoreOpen(false)}
-                className="flex flex-col items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle p-3 text-center text-xs font-medium text-text-primary hover:bg-slate-50"
+                className="flex flex-col items-center gap-2 rounded-[var(--radius-control)] border border-border-subtle p-3 text-center text-xs font-medium text-text-primary hover:bg-surface-hover"
               >
                 <ItemIcon className="h-5 w-5 text-brand-blue" />
                 {item.label}
@@ -65,10 +66,14 @@ export function MobileBottomNav({ role }: { role: Role }) {
             );
           })}
         </div>
-        <form action={signOutAction} className="mt-4 border-t border-border-subtle pt-4">
+        <div className="mt-4 flex items-center justify-between border-t border-border-subtle pt-4">
+          <span className="text-sm font-medium text-text-primary">Tema</span>
+          <ThemeToggle className="border border-border-subtle" />
+        </div>
+        <form action={signOutAction} className="mt-2 border-t border-border-subtle pt-4">
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-control)] py-2.5 text-sm font-medium text-negative hover:bg-red-50"
+            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-control)] py-2.5 text-sm font-medium text-negative hover:bg-negative/10"
           >
             <IconLogout className="h-[18px] w-[18px]" />
             Sair da conta

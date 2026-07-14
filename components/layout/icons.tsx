@@ -127,3 +127,30 @@ export const IconLogout = (props: SVGProps<SVGSVGElement>) => (
     <path d="M21 12H9" />
   </Icon>
 );
+
+export const IconSun = (props: SVGProps<SVGSVGElement>) => (
+  <Icon {...props}>
+    <circle cx="12" cy="12" r="4.5" />
+    <path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8" />
+  </Icon>
+);
+
+export const IconMoon = (props: SVGProps<SVGSVGElement>) => (
+  <Icon {...props}>
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" />
+  </Icon>
+);
+
+export const IconTrendingUp = (props: SVGProps<SVGSVGElement>) => (
+  <Icon {...props}>
+    <path d="m3 17 6-6 4 4 8-8" />
+    <path d="M15 7h6v6" />
+  </Icon>
+);
+
+export const IconTrendingDown = (props: SVGProps<SVGSVGElement>) => (
+  <Icon {...props}>
+    <path d="m3 7 6 6 4-4 8 8" />
+    <path d="M15 17h6v-6" />
+  </Icon>
+);

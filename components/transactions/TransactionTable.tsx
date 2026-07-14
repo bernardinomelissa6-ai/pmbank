@@ -116,7 +116,7 @@ export function TransactionTable({
         <>
           <div className="hidden overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-surface sm:block">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
+              <thead className="bg-surface-hover text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
                 <tr>
                   <th className="px-4 py-3">Descrição</th>
                   <th className="px-4 py-3">Categoria</th>
@@ -129,7 +129,7 @@ export function TransactionTable({
               </thead>
               <tbody className="divide-y divide-border-subtle">
                 {filteredRows.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50/60">
+                  <tr key={row.id} className="hover:bg-surface-hover">
                     <td className="px-4 py-3">
                       <div className="font-medium text-text-primary">{row.description}</div>
                       {row.extra ? <div className="text-xs text-text-secondary">{row.extra}</div> : null}

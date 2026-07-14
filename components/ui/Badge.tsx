@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils";
 type BadgeTone = "neutral" | "positive" | "negative" | "warning" | "brand";
 
 const toneClasses: Record<BadgeTone, string> = {
-  neutral: "bg-slate-100 text-text-secondary",
-  positive: "bg-green-50 text-positive",
-  negative: "bg-red-50 text-negative",
-  warning: "bg-amber-50 text-amber-600",
-  brand: "bg-blue-50 text-brand-blue",
+  neutral: "bg-text-secondary/10 text-text-secondary",
+  positive: "bg-positive/10 text-positive",
+  negative: "bg-negative/10 text-negative",
+  warning: "bg-warning/15 text-warning",
+  brand: "bg-brand-blue/10 text-brand-blue",
 };
 
 export function Badge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: BadgeTone }) {

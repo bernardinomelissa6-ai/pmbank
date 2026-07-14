@@ -21,7 +21,7 @@ export function FieldWrapper({ label, error, hint, className, children }: FieldW
 }
 
 const baseControlClasses =
-  "h-11 w-full rounded-[var(--radius-control)] border border-border-subtle bg-surface px-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:bg-slate-50 disabled:text-text-secondary";
+  "h-11 w-full rounded-[var(--radius-control)] border border-border-subtle bg-surface px-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:bg-surface-hover disabled:text-text-secondary";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;

@@ -5,7 +5,7 @@ export function ProgressBar({ value, className }: { value: number; className?: s
   const tone = clamped >= 100 ? "bg-positive" : "bg-brand-blue";
 
   return (
-    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-slate-100", className)}>
+    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-surface-hover", className)}>
       <div className={cn("h-full rounded-full transition-all", tone)} style={{ width: `${clamped}%` }} />
     </div>
   );

@@ -147,7 +147,7 @@ export function ConfiguracoesClient({
             </div>
             <ul className="flex flex-col gap-1.5">
               {expenseCategories.map((category) => (
-                <li key={category.id} className="flex items-center justify-between rounded-[var(--radius-control)] px-2 py-1.5 hover:bg-slate-50">
+                <li key={category.id} className="flex items-center justify-between rounded-[var(--radius-control)] px-2 py-1.5 hover:bg-surface-hover">
                   <span className="flex items-center gap-2 text-sm text-text-primary">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: category.color ?? "#64748B" }} />
                     {category.name}
@@ -196,7 +196,7 @@ export function ConfiguracoesClient({
             </div>
             <ul className="flex flex-col gap-1.5">
               {incomeCategories.map((category) => (
-                <li key={category.id} className="flex items-center justify-between rounded-[var(--radius-control)] px-2 py-1.5 hover:bg-slate-50">
+                <li key={category.id} className="flex items-center justify-between rounded-[var(--radius-control)] px-2 py-1.5 hover:bg-surface-hover">
                   <span className="flex items-center gap-2 text-sm text-text-primary">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: category.color ?? "#64748B" }} />
                     {category.name}

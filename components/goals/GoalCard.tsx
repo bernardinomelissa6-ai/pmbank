@@ -42,7 +42,7 @@ export function GoalCard({
       </div>
 
       {goal.status === "active" && suggestedMonthly > 0 ? (
-        <p className="mt-3 rounded-[var(--radius-control)] bg-blue-50 px-3 py-2 text-xs text-brand-blue">
+        <p className="mt-3 rounded-[var(--radius-control)] bg-brand-blue/10 px-3 py-2 text-xs text-brand-blue">
           Sugestão: guardar {formatCurrency(suggestedMonthly)}/mês para chegar no prazo.
         </p>
       ) : null}

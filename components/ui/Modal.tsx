@@ -41,7 +41,7 @@ export function Modal({
           <button
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-full p-1 text-text-secondary hover:bg-slate-100"
+            className="rounded-full p-1 text-text-secondary hover:bg-surface-hover"
           >
             ✕
           </button>

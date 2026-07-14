@@ -1,29 +1,67 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
-  --background: #f8fafc;
+  --background: #f4f6fb;
   --surface: #ffffff;
+  --surface-hover: #f1f5f9;
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --border-subtle: #e2e8f0;
+
   --positive: #16a34a;
+  --positive-strong: #22c55e;
   --negative: #dc2626;
+  --negative-strong: #f43f5e;
+  --warning: #d97706;
+  --warning-strong: #f59e0b;
   --brand-blue: #2563eb;
-  --brand-purple: #533afd;
+  --brand-blue-strong: #3b82f6;
+  --brand-purple: #7c3aed;
+  --brand-purple-strong: #a855f7;
+
   --radius-card: 16px;
   --radius-control: 12px;
+}
+
+:root[data-theme="dark"] {
+  --background: #0a0f1e;
+  --surface: #121a2e;
+  --surface-hover: #182238;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-subtle: #23304a;
+
+  --positive: #4ade80;
+  --positive-strong: #22c55e;
+  --negative: #fb7185;
+  --negative-strong: #f43f5e;
+  --warning: #fbbf24;
+  --warning-strong: #f59e0b;
+  --brand-blue: #60a5fa;
+  --brand-blue-strong: #3b82f6;
+  --brand-purple: #c084fc;
+  --brand-purple-strong: #a855f7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-border-subtle: var(--border-subtle);
   --color-positive: var(--positive);
+  --color-positive-strong: var(--positive-strong);
   --color-negative: var(--negative);
+  --color-negative-strong: var(--negative-strong);
+  --color-warning: var(--warning);
+  --color-warning-strong: var(--warning-strong);
   --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-strong: var(--brand-blue-strong);
   --color-brand-purple: var(--brand-purple);
+  --color-brand-purple-strong: var(--brand-purple-strong);
   --radius-card: var(--radius-card);
   --radius-control: var(--radius-control);
 }
@@ -33,6 +71,7 @@ body {
   color: var(--text-primary);
   font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 ::-webkit-scrollbar {

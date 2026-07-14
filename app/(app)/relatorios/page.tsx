@@ -14,11 +14,18 @@ import {
 } from "@/lib/finance-calculations";
 import { addMonths, monthRange, MONTH_NAMES } from "@/lib/format";
 import { RelatoriosClient } from "./RelatoriosClient";
+import { PersonFilter } from "@/components/dashboard/PersonFilter";
 import type { Expense, Income, Installment } from "@/types/database";
 
-export default async function RelatoriosPage() {
+export default async function RelatoriosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ person?: string }>;
+}) {
   await requireProfile();
   const supabase = await createClient();
+  const params = await searchParams;
+  const person = params.person || "all";
 
   const now = new Date();
   const previous = addMonths(now, -1);
@@ -30,6 +37,78 @@ export default async function RelatoriosPage() {
 
   const projectionEnd = addMonths(now, 12);
   const projectionEndISO = monthRange(projectionEnd.getMonth() + 1, projectionEnd.getFullYear()).endISO;
+
+  let incomesCurrentQuery = supabase.from("incomes").select("*").gte("expected_date", currentRange.startISO).lte("expected_date", currentRange.endISO);
+  let expensesCurrentQuery = supabase
+    .from("expenses")
+    .select("*, category:categories(name)")
+    .neq("expense_type", "installment")
+    .gte("due_date", currentRange.startISO)
+    .lte("due_date", currentRange.endISO);
+  let installmentsCurrentQuery = supabase.from("installments").select("*").gte("due_date", currentRange.startISO).lte("due_date", currentRange.endISO);
+  let incomesPreviousQuery = supabase.from("incomes").select("*").gte("expected_date", previousRange.startISO).lte("expected_date", previousRange.endISO);
+  let expensesPreviousQuery = supabase
+    .from("expenses")
+    .select("*")
+    .neq("expense_type", "installment")
+    .gte("due_date", previousRange.startISO)
+    .lte("due_date", previousRange.endISO);
+  let installmentsPreviousQuery = supabase.from("installments").select("*").gte("due_date", previousRange.startISO).lte("due_date", previousRange.endISO);
+  let incomesHistoryQuery = supabase
+    .from("incomes")
+    .select("amount, status, expected_date")
+    .gte("expected_date", historyStartISO)
+    .lte("expected_date", currentRange.endISO);
+  let expensesHistoryQuery = supabase
+    .from("expenses")
+    .select("amount, status, due_date")
+    .neq("expense_type", "installment")
+    .gte("due_date", historyStartISO)
+    .lte("due_date", currentRange.endISO);
+  let installmentsHistoryQuery = supabase.from("installments").select("amount, status, due_date").gte("due_date", historyStartISO).lte("due_date", currentRange.endISO);
+  let fixedIncomesQuery = supabase
+    .from("incomes")
+    .select("*")
+    .eq("income_type", "fixed")
+    .gte("expected_date", currentRange.startISO)
+    .lte("expected_date", currentRange.endISO);
+  let fixedExpensesQuery = supabase
+    .from("expenses")
+    .select("*")
+    .eq("expense_type", "fixed")
+    .gte("due_date", currentRange.startISO)
+    .lte("due_date", currentRange.endISO);
+  let futureIncomesQuery = supabase
+    .from("incomes")
+    .select("amount, expected_date")
+    .neq("income_type", "fixed")
+    .gt("expected_date", currentRange.endISO)
+    .lte("expected_date", projectionEndISO);
+  let futureExpensesQuery = supabase
+    .from("expenses")
+    .select("amount, due_date")
+    .neq("expense_type", "fixed")
+    .neq("expense_type", "installment")
+    .gt("due_date", currentRange.endISO)
+    .lte("due_date", projectionEndISO);
+  let openInstallmentsQuery = supabase.from("installments").select("*").eq("status", "open");
+
+  if (person !== "all") {
+    incomesCurrentQuery = incomesCurrentQuery.eq("user_id", person);
+    expensesCurrentQuery = expensesCurrentQuery.eq("user_id", person);
+    installmentsCurrentQuery = installmentsCurrentQuery.eq("user_id", person);
+    incomesPreviousQuery = incomesPreviousQuery.eq("user_id", person);
+    expensesPreviousQuery = expensesPreviousQuery.eq("user_id", person);
+    installmentsPreviousQuery = installmentsPreviousQuery.eq("user_id", person);
+    incomesHistoryQuery = incomesHistoryQuery.eq("user_id", person);
+    expensesHistoryQuery = expensesHistoryQuery.eq("user_id", person);
+    installmentsHistoryQuery = installmentsHistoryQuery.eq("user_id", person);
+    fixedIncomesQuery = fixedIncomesQuery.eq("user_id", person);
+    fixedExpensesQuery = fixedExpensesQuery.eq("user_id", person);
+    futureIncomesQuery = futureIncomesQuery.eq("user_id", person);
+    futureExpensesQuery = futureExpensesQuery.eq("user_id", person);
+    openInstallmentsQuery = openInstallmentsQuery.eq("user_id", person);
+  }
 
   const [
     { data: incomesCurrent },
@@ -48,46 +127,20 @@ export default async function RelatoriosPage() {
     { data: openInstallments },
     { data: members },
   ] = await Promise.all([
-    supabase.from("incomes").select("*").gte("expected_date", currentRange.startISO).lte("expected_date", currentRange.endISO),
-    supabase
-      .from("expenses")
-      .select("*, category:categories(name)")
-      .neq("expense_type", "installment")
-      .gte("due_date", currentRange.startISO)
-      .lte("due_date", currentRange.endISO),
-    supabase.from("installments").select("*").gte("due_date", currentRange.startISO).lte("due_date", currentRange.endISO),
-    supabase.from("incomes").select("*").gte("expected_date", previousRange.startISO).lte("expected_date", previousRange.endISO),
-    supabase
-      .from("expenses")
-      .select("*")
-      .neq("expense_type", "installment")
-      .gte("due_date", previousRange.startISO)
-      .lte("due_date", previousRange.endISO),
-    supabase.from("installments").select("*").gte("due_date", previousRange.startISO).lte("due_date", previousRange.endISO),
-    supabase.from("incomes").select("amount, status, expected_date").gte("expected_date", historyStartISO).lte("expected_date", currentRange.endISO),
-    supabase
-      .from("expenses")
-      .select("amount, status, due_date")
-      .neq("expense_type", "installment")
-      .gte("due_date", historyStartISO)
-      .lte("due_date", currentRange.endISO),
-    supabase.from("installments").select("amount, status, due_date").gte("due_date", historyStartISO).lte("due_date", currentRange.endISO),
-    supabase.from("incomes").select("*").eq("income_type", "fixed").gte("expected_date", currentRange.startISO).lte("expected_date", currentRange.endISO),
-    supabase.from("expenses").select("*").eq("expense_type", "fixed").gte("due_date", currentRange.startISO).lte("due_date", currentRange.endISO),
-    supabase
-      .from("incomes")
-      .select("amount, expected_date")
-      .neq("income_type", "fixed")
-      .gt("expected_date", currentRange.endISO)
-      .lte("expected_date", projectionEndISO),
-    supabase
-      .from("expenses")
-      .select("amount, due_date")
-      .neq("expense_type", "fixed")
-      .neq("expense_type", "installment")
-      .gt("due_date", currentRange.endISO)
-      .lte("due_date", projectionEndISO),
-    supabase.from("installments").select("*").eq("status", "open"),
+    incomesCurrentQuery,
+    expensesCurrentQuery,
+    installmentsCurrentQuery,
+    incomesPreviousQuery,
+    expensesPreviousQuery,
+    installmentsPreviousQuery,
+    incomesHistoryQuery,
+    expensesHistoryQuery,
+    installmentsHistoryQuery,
+    fixedIncomesQuery,
+    fixedExpensesQuery,
+    futureIncomesQuery,
+    futureExpensesQuery,
+    openInstallmentsQuery,
     supabase.from("profiles").select("user_id, name"),
   ]);
 
@@ -149,9 +202,12 @@ export default async function RelatoriosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text-primary">Relatórios</h1>
-        <p className="text-sm text-text-secondary">Comparativos, médias e projeções financeiras da família.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-text-primary">Relatórios</h1>
+          <p className="text-sm text-text-secondary">Comparativos, médias e projeções financeiras da família.</p>
+        </div>
+        <PersonFilter person={person} options={(members ?? []).map((m) => ({ value: m.user_id, label: m.name }))} />
       </div>
 
       <div>
@@ -181,11 +237,11 @@ export default async function RelatoriosPage() {
       </div>
 
       {firstRiskMonth ? (
-        <div className="rounded-[var(--radius-card)] border border-red-200 bg-red-50 p-4 text-sm text-negative">
+        <div className="rounded-[var(--radius-card)] border border-negative/30 bg-negative/10 p-4 text-sm text-negative">
           Atenção: a projeção indica saldo negativo em <strong>{firstRiskMonth.label}</strong>.
         </div>
       ) : (
-        <div className="rounded-[var(--radius-card)] border border-green-200 bg-green-50 p-4 text-sm text-positive">
+        <div className="rounded-[var(--radius-card)] border border-positive/30 bg-positive/10 p-4 text-sm text-positive">
           Nenhum mês com risco de saldo negativo nos próximos 12 meses.
         </div>
       )}

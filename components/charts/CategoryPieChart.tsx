@@ -2,7 +2,7 @@
 
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { formatCurrency } from "@/lib/format";
-import { colorForIndex } from "./palette";
+import { CHART_TOOLTIP_STYLE, colorForIndex } from "./palette";
 
 export interface CategorySlice {
   name: string;
@@ -26,8 +26,8 @@ export function CategoryPieChart({ data }: { data: CategorySlice[] }) {
             <Cell key={entry.name} fill={colorForIndex(index)} />
           ))}
         </Pie>
-        <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-        <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: 12, color: "#64748B" }} />
+        <Tooltip formatter={(value) => formatCurrency(Number(value))} contentStyle={CHART_TOOLTIP_STYLE} />
+        <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: 12, color: "var(--text-secondary)" }} />
       </PieChart>
     </ResponsiveContainer>
   );

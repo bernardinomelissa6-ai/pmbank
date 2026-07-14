@@ -53,7 +53,7 @@ export function UsuariosClient({ currentProfileId, members }: { currentProfileId
 
       <div className="overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-surface">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
+          <thead className="bg-surface-hover text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
             <tr>
               <th className="px-4 py-3">Nome</th>
               <th className="px-4 py-3">E-mail</th>

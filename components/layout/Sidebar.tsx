@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { PRIMARY_NAV, MORE_NAV } from "@/components/layout/nav-items";
 import { IconLogout } from "@/components/layout/icons";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import type { Role } from "@/types/database";
 import { signOutAction } from "@/actions/auth";
 
@@ -22,9 +23,12 @@ export function Sidebar({
 
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border-subtle bg-surface px-4 py-6 sm:flex">
-      <div className="mb-8 px-2">
-        <p className="text-lg font-semibold tracking-tight text-text-primary">CasaFlow</p>
-        <p className="text-xs text-text-secondary">{householdName}</p>
+      <div className="mb-8 flex items-start justify-between px-2">
+        <div>
+          <p className="text-lg font-semibold tracking-tight text-text-primary">CasaFlow</p>
+          <p className="text-xs text-text-secondary">{householdName}</p>
+        </div>
+        <ThemeToggle />
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
@@ -37,7 +41,9 @@ export function Sidebar({
               href={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 text-sm font-medium transition-colors",
-                active ? "bg-blue-50 text-brand-blue" : "text-text-secondary hover:bg-slate-100 hover:text-text-primary"
+                active
+                  ? "bg-brand-blue/10 text-brand-blue"
+                  : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               )}
             >
               <ItemIcon className="h-[18px] w-[18px]" />
@@ -53,7 +59,7 @@ export function Sidebar({
         <form action={signOutAction}>
           <button
             type="submit"
-            className="mt-2 flex w-full items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 text-sm font-medium text-text-secondary hover:bg-slate-100 hover:text-text-primary"
+            className="mt-2 flex w-full items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-hover hover:text-text-primary"
           >
             <IconLogout className="h-[18px] w-[18px]" />
             Sair
