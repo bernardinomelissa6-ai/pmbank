@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatCurrency, formatDate, MONTH_NAMES } from "@/lib/format";
 import { Badge, STATUS_BADGE } from "@/components/ui/Badge";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -73,30 +73,15 @@ export function TransactionTable({
     return true;
   });
 
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
+    setPage(1);
   }, [status, person, category, month]);
 
-  useEffect(() => {
-    const node = loadMoreRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((count) => Math.min(count + PAGE_SIZE, filteredRows.length));
-        }
-      },
-      { rootMargin: "200px" }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [filteredRows.length]);
-
-  const visibleRows = filteredRows.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredRows.length;
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleRows = filteredRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <div className="flex flex-col gap-4">
@@ -217,9 +202,29 @@ export function TransactionTable({
             ))}
           </div>
 
-          {hasMore ? (
-            <div ref={loadMoreRef} className="flex items-center justify-center py-3 text-xs text-text-secondary">
-              Carregando mais…
+          {totalPages > 1 ? (
+            <div className="flex items-center justify-center gap-1 pt-1">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                aria-label="Página anterior"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <IconChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="px-2 text-xs font-medium text-text-secondary">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                aria-label="Próxima página"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <IconChevronRight className="h-4 w-4" />
+              </button>
             </div>
           ) : null}
         </>
