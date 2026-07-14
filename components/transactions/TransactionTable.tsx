@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatCurrency, formatDate, MONTH_NAMES } from "@/lib/format";
 import { Badge, STATUS_BADGE } from "@/components/ui/Badge";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -29,6 +29,8 @@ interface FilterOption {
   value: string;
   label: string;
 }
+
+const PAGE_SIZE = 25;
 
 export function TransactionTable({
   rows,
@@ -70,6 +72,31 @@ export function TransactionTable({
     if (month !== "all" && row.date.slice(0, 7) !== month) return false;
     return true;
   });
+
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [status, person, category, month]);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((count) => Math.min(count + PAGE_SIZE, filteredRows.length));
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [filteredRows.length]);
+
+  const visibleRows = filteredRows.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredRows.length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -116,7 +143,7 @@ export function TransactionTable({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle">
-                {filteredRows.map((row) => (
+                {visibleRows.map((row) => (
                   <tr key={row.id} className="hover:bg-surface-hover">
                     <td className="px-4 py-3">
                       <div className="font-medium text-text-primary">{row.description}</div>
@@ -156,7 +183,7 @@ export function TransactionTable({
           </div>
 
           <div className="flex flex-col gap-3 sm:hidden">
-            {filteredRows.map((row) => (
+            {visibleRows.map((row) => (
               <div key={row.id} className="rounded-[var(--radius-card)] border border-border-subtle bg-surface p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -189,6 +216,12 @@ export function TransactionTable({
               </div>
             ))}
           </div>
+
+          {hasMore ? (
+            <div ref={loadMoreRef} className="flex items-center justify-center py-3 text-xs text-text-secondary">
+              Carregando mais…
+            </div>
+          ) : null}
         </>
       )}
 

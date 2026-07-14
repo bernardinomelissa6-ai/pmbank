@@ -158,15 +158,17 @@ export default async function RelatoriosPage({
   const memberByUserId = new Map((members ?? []).map((m) => [m.user_id, m.name]));
 
   const categoryTotals = new Map<string, number>();
-  const personTotals = new Map<string, number>();
+  const personTotals = new Map<string, { name: string; value: number }>();
   for (const expense of (expensesCurrent ?? []) as (Expense & { category: { name: string } | null })[]) {
     const categoryName = expense.category?.name ?? "Outros";
     categoryTotals.set(categoryName, (categoryTotals.get(categoryName) ?? 0) + expense.amount);
-    const personName = memberByUserId.get(expense.user_id) ?? "Outro";
-    personTotals.set(personName, (personTotals.get(personName) ?? 0) + expense.amount);
+    const personId = expense.user_id;
+    const personName = memberByUserId.get(personId) ?? "Outro";
+    const current = personTotals.get(personId);
+    personTotals.set(personId, { name: personName, value: (current?.value ?? 0) + expense.amount });
   }
   const categoryData = Array.from(categoryTotals.entries()).map(([name, value]) => ({ name, value }));
-  const personData = Array.from(personTotals.entries()).map(([name, value]) => ({ name, value }));
+  const personData = Array.from(personTotals.entries()).map(([id, { name, value }]) => ({ id, name, value }));
 
   const incomeByMonth = new Map<string, number>();
   for (const income of incomesHistory ?? []) {

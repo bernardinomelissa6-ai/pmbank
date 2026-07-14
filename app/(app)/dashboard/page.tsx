@@ -127,12 +127,14 @@ export default async function DashboardPage({
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
 
-  const personTotals = new Map<string, number>();
+  const personTotals = new Map<string, { name: string; value: number }>();
   for (const expense of expenses) {
-    const name = memberByUserId.get(expense.user_id) ?? "Outro";
-    personTotals.set(name, (personTotals.get(name) ?? 0) + expense.amount);
+    const id = expense.user_id;
+    const name = memberByUserId.get(id) ?? "Outro";
+    const current = personTotals.get(id);
+    personTotals.set(id, { name, value: (current?.value ?? 0) + expense.amount });
   }
-  const personData = Array.from(personTotals.entries()).map(([name, value]) => ({ name, value }));
+  const personData = Array.from(personTotals.entries()).map(([id, { name, value }]) => ({ id, name, value }));
 
   const cardTotals = new Map<string, number>();
   for (const expense of expenses) {
