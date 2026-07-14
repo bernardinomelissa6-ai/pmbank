@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { Badge, STATUS_BADGE } from "@/components/ui/Badge";
-import { Select } from "@/components/ui/Input";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -76,38 +76,33 @@ export function TransactionTable({
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status">
-          <option value="all">Todos os status</option>
-          {Object.entries(STATUS_BADGE).map(([key, { label }]) => (
-            <option key={key} value={key}>
-              {label}
-            </option>
-          ))}
-        </Select>
-        <Select value={person} onChange={(e) => setPerson(e.target.value)} aria-label="Pessoa">
-          <option value="all">Todas as pessoas</option>
-          {personOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-        <Select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Categoria">
-          <option value="all">Todas as categorias</option>
-          {categoryOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-        <Select value={month} onChange={(e) => setMonth(e.target.value)} aria-label="Mês">
-          <option value="all">Todos os meses</option>
-          {monthOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
+        <Dropdown
+          value={status}
+          onChange={setStatus}
+          ariaLabel="Status"
+          options={[
+            { value: "all", label: "Todos os status" },
+            ...Object.entries(STATUS_BADGE).map(([key, { label }]) => ({ value: key, label })),
+          ]}
+        />
+        <Dropdown
+          value={person}
+          onChange={setPerson}
+          ariaLabel="Pessoa"
+          options={[{ value: "all", label: "Todas as pessoas" }, ...personOptions]}
+        />
+        <Dropdown
+          value={category}
+          onChange={setCategory}
+          ariaLabel="Categoria"
+          options={[{ value: "all", label: "Todas as categorias" }, ...categoryOptions]}
+        />
+        <Dropdown
+          value={month}
+          onChange={setMonth}
+          ariaLabel="Mês"
+          options={[{ value: "all", label: "Todos os meses" }, ...monthOptions]}
+        />
       </div>
 
       {filteredRows.length === 0 ? (
