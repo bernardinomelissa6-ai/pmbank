@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Badge, STATUS_BADGE } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { CardForm, type CardFormInitialValues } from "@/components/cards/CardForm";
 import { deleteCard } from "@/actions/cards";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -18,6 +19,8 @@ interface LinkedExpense {
   amount: number;
   due_date: string;
   status: string;
+  personId: string;
+  personName: string;
 }
 
 export function CartoesClient({
@@ -25,36 +28,47 @@ export function CartoesClient({
   accounts,
   isAdmin,
   expensesByCard,
+  personOptions,
 }: {
   cards: Card[];
   accounts: { id: string; name: string }[];
   isAdmin: boolean;
   expensesByCard: Record<string, LinkedExpense[]>;
+  personOptions: { value: string; label: string }[];
 }) {
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CardFormInitialValues | undefined>(undefined);
   const [formKey, setFormKey] = useState(0);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [person, setPerson] = useState("all");
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-text-primary">Cartões</h1>
           <p className="text-sm text-text-secondary">Limite, fatura atual e gastos vinculados do mês.</p>
         </div>
-        {isAdmin ? (
-          <Button
-            onClick={() => {
-              setEditing(undefined);
-              setFormKey((k) => k + 1);
-              setFormOpen(true);
-            }}
-          >
-            Novo cartão
-          </Button>
-        ) : null}
+        <div className="flex items-center gap-2">
+          <Dropdown
+            value={person}
+            onChange={setPerson}
+            ariaLabel="Pessoa"
+            options={[{ value: "all", label: "Todas as pessoas" }, ...personOptions]}
+          />
+          {isAdmin ? (
+            <Button
+              onClick={() => {
+                setEditing(undefined);
+                setFormKey((k) => k + 1);
+                setFormOpen(true);
+              }}
+            >
+              Novo cartão
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {cards.length === 0 ? (
@@ -62,8 +76,9 @@ export function CartoesClient({
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {cards.map((card) => {
-            const linked = expensesByCard[card.id] ?? [];
-            const currentInvoice = linked.reduce((sum, expense) => sum + expense.amount, 0);
+            const allLinked = expensesByCard[card.id] ?? [];
+            const linked = person === "all" ? allLinked : allLinked.filter((expense) => expense.personId === person);
+            const currentInvoice = allLinked.reduce((sum, expense) => sum + expense.amount, 0);
             const usage = card.limit_amount ? (currentInvoice / card.limit_amount) * 100 : 0;
             const availableLimit = card.limit_amount ? card.limit_amount - currentInvoice : null;
             return (
@@ -123,14 +138,18 @@ export function CartoesClient({
                     Gastos vinculados este mês
                   </p>
                   {linked.length === 0 ? (
-                    <p className="text-sm text-text-secondary">Nenhum gasto neste mês.</p>
+                    <p className="text-sm text-text-secondary">
+                      {person === "all" ? "Nenhum gasto neste mês." : "Nenhum gasto dessa pessoa neste mês."}
+                    </p>
                   ) : (
                     <ul className="flex flex-col gap-2">
                       {linked.map((expense) => (
                         <li key={expense.id} className="flex items-center justify-between text-sm">
                           <div>
                             <p className="text-text-primary">{expense.description}</p>
-                            <p className="text-xs text-text-secondary">{formatDate(expense.due_date)}</p>
+                            <p className="text-xs text-text-secondary">
+                              {formatDate(expense.due_date)} · {expense.personName}
+                            </p>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge tone={STATUS_BADGE[expense.status]?.tone ?? "neutral"}>
