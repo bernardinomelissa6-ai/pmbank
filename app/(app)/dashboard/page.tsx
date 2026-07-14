@@ -96,7 +96,7 @@ export default async function DashboardPage({
     incomesHistoryQuery,
     expensesHistoryQuery,
     installmentsHistoryQuery,
-    supabase.from("profiles").select("user_id, name"),
+    supabase.from("profiles").select("user_id, name, status"),
     supabase.from("cards").select("id, name"),
   ]);
 
@@ -127,14 +127,36 @@ export default async function DashboardPage({
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
 
-  const personTotals = new Map<string, { name: string; value: number }>();
-  for (const expense of expenses) {
-    const id = expense.user_id;
-    const name = memberByUserId.get(id) ?? "Outro";
-    const current = personTotals.get(id);
-    personTotals.set(id, { name, value: (current?.value ?? 0) + expense.amount });
+  const personStats = new Map<string, { name: string; spent: number; pending: number; received: number }>();
+  function personEntry(id: string) {
+    let entry = personStats.get(id);
+    if (!entry) {
+      entry = { name: memberByUserId.get(id) ?? "Outro", spent: 0, pending: 0, received: 0 };
+      personStats.set(id, entry);
+    }
+    return entry;
   }
-  const personData = Array.from(personTotals.entries()).map(([id, { name, value }]) => ({ id, name, value }));
+  for (const expense of expenses) {
+    const entry = personEntry(expense.user_id);
+    if (expense.status === "paid") entry.spent += expense.amount;
+    else if (expense.status === "open" || expense.status === "late") entry.pending += expense.amount;
+  }
+  for (const installment of installments) {
+    const entry = personEntry(installment.user_id);
+    if (installment.status === "paid") entry.spent += installment.amount;
+    else if (installment.status === "open" || installment.status === "late") entry.pending += installment.amount;
+  }
+  for (const income of incomes) {
+    if (income.status !== "received") continue;
+    personEntry(income.user_id).received += income.amount;
+  }
+  const personData = Array.from(personStats.entries()).map(([id, { name, spent, pending, received }]) => ({
+    id,
+    name,
+    spent,
+    pending,
+    remaining: received - spent,
+  }));
 
   const cardTotals = new Map<string, number>();
   for (const expense of expenses) {
@@ -216,7 +238,9 @@ export default async function DashboardPage({
         <div className="flex flex-wrap items-center gap-2">
           <PersonFilter
             person={person}
-            options={(members ?? []).map((m) => ({ value: m.user_id, label: m.name }))}
+            options={(members ?? [])
+              .filter((m) => m.status === "active")
+              .map((m) => ({ value: m.user_id, label: m.name }))}
           />
           <MonthNav month={month} year={year} />
         </div>

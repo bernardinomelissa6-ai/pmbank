@@ -14,7 +14,7 @@ export default async function EntradasPage() {
         .order("expected_date", { ascending: false }),
       supabase.from("categories").select("id,name").eq("type", "income").order("name"),
       supabase.from("accounts").select("id,name").order("name"),
-      supabase.from("profiles").select("id,user_id,name"),
+      supabase.from("profiles").select("id,user_id,name,status"),
       supabase.from("income_recurrences").select("*").eq("status", "active"),
     ]);
 
@@ -29,7 +29,9 @@ export default async function EntradasPage() {
       }))}
       categories={categories ?? []}
       accounts={accounts ?? []}
-      members={(members ?? []).map((m) => ({ id: m.user_id, name: m.name }))}
+      members={(members ?? [])
+        .filter((m) => m.status === "active")
+        .map((m) => ({ id: m.user_id, name: m.name }))}
       recurrences={recurrences ?? []}
     />
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatCurrency, formatDate, MONTH_NAMES } from "@/lib/format";
 import { Badge, STATUS_BADGE } from "@/components/ui/Badge";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -29,8 +29,6 @@ interface FilterOption {
   value: string;
   label: string;
 }
-
-const PAGE_SIZE = 25;
 
 export function TransactionTable({
   rows,
@@ -73,16 +71,6 @@ export function TransactionTable({
     return true;
   });
 
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(1);
-  }, [status, person, category, month]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const visibleRows = filteredRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -114,9 +102,9 @@ export function TransactionTable({
         <EmptyState title="Nada por aqui ainda" description="Ajuste os filtros ou crie um novo lançamento." />
       ) : (
         <>
-          <div className="hidden overflow-hidden rounded-[var(--radius-card)] border border-border-subtle bg-surface sm:block">
+          <div className="hidden max-h-[600px] overflow-y-auto rounded-[var(--radius-card)] border border-border-subtle bg-surface sm:block">
             <table className="w-full text-sm">
-              <thead className="bg-surface-hover text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
+              <thead className="sticky top-0 z-10 bg-surface-hover text-left text-xs font-medium uppercase tracking-wide text-text-secondary">
                 <tr>
                   <th className="px-4 py-3">Descrição</th>
                   <th className="px-4 py-3">Categoria</th>
@@ -128,7 +116,7 @@ export function TransactionTable({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle">
-                {visibleRows.map((row) => (
+                {filteredRows.map((row) => (
                   <tr key={row.id} className="hover:bg-surface-hover">
                     <td className="px-4 py-3">
                       <div className="font-medium text-text-primary">{row.description}</div>
@@ -167,8 +155,8 @@ export function TransactionTable({
             </table>
           </div>
 
-          <div className="flex flex-col gap-3 sm:hidden">
-            {visibleRows.map((row) => (
+          <div className="flex max-h-[600px] flex-col gap-3 overflow-y-auto sm:hidden">
+            {filteredRows.map((row) => (
               <div key={row.id} className="rounded-[var(--radius-card)] border border-border-subtle bg-surface p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -201,32 +189,6 @@ export function TransactionTable({
               </div>
             ))}
           </div>
-
-          {totalPages > 1 ? (
-            <div className="flex items-center justify-center gap-1 pt-1">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage <= 1}
-                aria-label="Página anterior"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
-              >
-                <IconChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="px-2 text-xs font-medium text-text-secondary">
-                Página {currentPage} de {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage >= totalPages}
-                aria-label="Próxima página"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary hover:bg-surface-hover hover:text-text-primary disabled:opacity-30 disabled:hover:bg-transparent"
-              >
-                <IconChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          ) : null}
         </>
       )}
 

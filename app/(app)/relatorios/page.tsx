@@ -141,7 +141,7 @@ export default async function RelatoriosPage({
     futureIncomesQuery,
     futureExpensesQuery,
     openInstallmentsQuery,
-    supabase.from("profiles").select("user_id, name"),
+    supabase.from("profiles").select("user_id, name, status"),
   ]);
 
   function monthSummary(incomes: Income[], expenses: Expense[], installments: Installment[]) {
@@ -158,17 +158,42 @@ export default async function RelatoriosPage({
   const memberByUserId = new Map((members ?? []).map((m) => [m.user_id, m.name]));
 
   const categoryTotals = new Map<string, number>();
-  const personTotals = new Map<string, { name: string; value: number }>();
   for (const expense of (expensesCurrent ?? []) as (Expense & { category: { name: string } | null })[]) {
     const categoryName = expense.category?.name ?? "Outros";
     categoryTotals.set(categoryName, (categoryTotals.get(categoryName) ?? 0) + expense.amount);
-    const personId = expense.user_id;
-    const personName = memberByUserId.get(personId) ?? "Outro";
-    const current = personTotals.get(personId);
-    personTotals.set(personId, { name: personName, value: (current?.value ?? 0) + expense.amount });
   }
   const categoryData = Array.from(categoryTotals.entries()).map(([name, value]) => ({ name, value }));
-  const personData = Array.from(personTotals.entries()).map(([id, { name, value }]) => ({ id, name, value }));
+
+  const personStats = new Map<string, { name: string; spent: number; pending: number; received: number }>();
+  function personEntry(id: string) {
+    let entry = personStats.get(id);
+    if (!entry) {
+      entry = { name: memberByUserId.get(id) ?? "Outro", spent: 0, pending: 0, received: 0 };
+      personStats.set(id, entry);
+    }
+    return entry;
+  }
+  for (const expense of (expensesCurrent ?? []) as Expense[]) {
+    const entry = personEntry(expense.user_id);
+    if (expense.status === "paid") entry.spent += expense.amount;
+    else if (expense.status === "open" || expense.status === "late") entry.pending += expense.amount;
+  }
+  for (const installment of (installmentsCurrent ?? []) as Installment[]) {
+    const entry = personEntry(installment.user_id);
+    if (installment.status === "paid") entry.spent += installment.amount;
+    else if (installment.status === "open" || installment.status === "late") entry.pending += installment.amount;
+  }
+  for (const income of (incomesCurrent ?? []) as Income[]) {
+    if (income.status !== "received") continue;
+    personEntry(income.user_id).received += income.amount;
+  }
+  const personData = Array.from(personStats.entries()).map(([id, { name, spent, pending, received }]) => ({
+    id,
+    name,
+    spent,
+    pending,
+    remaining: received - spent,
+  }));
 
   const incomeByMonth = new Map<string, number>();
   for (const income of incomesHistory ?? []) {
@@ -209,7 +234,12 @@ export default async function RelatoriosPage({
           <h1 className="text-xl font-semibold text-text-primary">Relatórios</h1>
           <p className="text-sm text-text-secondary">Comparativos, médias e projeções financeiras da família.</p>
         </div>
-        <PersonFilter person={person} options={(members ?? []).map((m) => ({ value: m.user_id, label: m.name }))} />
+        <PersonFilter
+          person={person}
+          options={(members ?? [])
+            .filter((m) => m.status === "active")
+            .map((m) => ({ value: m.user_id, label: m.name }))}
+        />
       </div>
 
       <div>

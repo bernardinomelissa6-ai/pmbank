@@ -15,7 +15,7 @@ export default async function GastosPage() {
       supabase.from("categories").select("id,name").eq("type", "expense").order("name"),
       supabase.from("accounts").select("id,name").order("name"),
       supabase.from("cards").select("id,name").order("name"),
-      supabase.from("profiles").select("id,user_id,name"),
+      supabase.from("profiles").select("id,user_id,name,status"),
     ]);
 
   const memberByUserId = new Map((members ?? []).map((member) => [member.user_id, member]));
@@ -30,7 +30,9 @@ export default async function GastosPage() {
       categories={categories ?? []}
       accounts={accounts ?? []}
       cards={cards ?? []}
-      members={(members ?? []).map((m) => ({ id: m.user_id, name: m.name }))}
+      members={(members ?? [])
+        .filter((m) => m.status === "active")
+        .map((m) => ({ id: m.user_id, name: m.name }))}
     />
   );
 }

@@ -1,15 +1,23 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatCurrency } from "@/lib/format";
-import { CHART_TOOLTIP_STYLE, colorForIndex } from "./palette";
+import { CHART_TOOLTIP_STYLE, STATUS_COLORS } from "./palette";
 
 export interface PersonSlice {
   id: string;
   name: string;
-  value: number;
+  spent: number;
+  remaining: number;
+  pending: number;
 }
+
+const SERIES = [
+  { dataKey: "spent", name: "Gasto", color: STATUS_COLORS.brand },
+  { dataKey: "remaining", name: "Sobra", color: STATUS_COLORS.positive },
+  { dataKey: "pending", name: "Em aberto", color: STATUS_COLORS.warning },
+] as const;
 
 export function PersonBarChart({ data }: { data: PersonSlice[] }) {
   const router = useRouter();
@@ -49,17 +57,20 @@ export function PersonBarChart({ data }: { data: PersonSlice[] }) {
           width={90}
         />
         <Tooltip formatter={(value) => formatCurrency(Number(value))} contentStyle={CHART_TOOLTIP_STYLE} cursor={{ fill: "var(--surface-hover)" }} />
-        <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={56}>
-          {data.map((entry, index) => (
-            <Cell
-              key={entry.id}
-              fill={colorForIndex(index)}
-              opacity={activePersonId && activePersonId !== entry.id ? 0.4 : 1}
-              cursor="pointer"
-              onClick={() => handleBarClick(entry.id)}
-            />
-          ))}
-        </Bar>
+        <Legend wrapperStyle={{ fontSize: 12, color: "var(--text-secondary)" }} />
+        {SERIES.map((series) => (
+          <Bar key={series.dataKey} dataKey={series.dataKey} name={series.name} radius={[4, 4, 0, 0]} maxBarSize={28}>
+            {data.map((entry) => (
+              <Cell
+                key={entry.id}
+                fill={series.color}
+                opacity={activePersonId && activePersonId !== entry.id ? 0.4 : 1}
+                cursor="pointer"
+                onClick={() => handleBarClick(entry.id)}
+              />
+            ))}
+          </Bar>
+        ))}
       </BarChart>
     </ResponsiveContainer>
   );

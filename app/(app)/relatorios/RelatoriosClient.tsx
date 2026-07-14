@@ -8,10 +8,10 @@ import { formatCurrency } from "@/lib/format";
 import { CHART_TOOLTIP_STYLE, STATUS_COLORS } from "@/components/charts/palette";
 import type { MonthProjection } from "@/lib/finance-calculations";
 
-const RANGES = [3, 6, 12] as const;
+const RANGES = [6, 12] as const;
 
 export function RelatoriosClient({ projection }: { projection: MonthProjection[] }) {
-  const [range, setRange] = useState<(typeof RANGES)[number]>(3);
+  const [range, setRange] = useState<(typeof RANGES)[number]>(6);
   const data = projection.slice(0, range);
 
   return (

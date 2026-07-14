@@ -65,6 +65,7 @@ export function CartoesClient({
             const linked = expensesByCard[card.id] ?? [];
             const currentInvoice = linked.reduce((sum, expense) => sum + expense.amount, 0);
             const usage = card.limit_amount ? (currentInvoice / card.limit_amount) * 100 : 0;
+            const availableLimit = card.limit_amount ? card.limit_amount - currentInvoice : null;
             return (
               <div key={card.id} className="rounded-[var(--radius-card)] border border-border-subtle bg-surface p-5">
                 <div className="flex items-start justify-between">
@@ -110,6 +111,11 @@ export function CartoesClient({
                   </div>
                   <p className="text-xs text-text-secondary">Fatura atual</p>
                   {card.limit_amount ? <ProgressBar value={usage} className="mt-2" /> : null}
+                  {availableLimit !== null ? (
+                    <p className="mt-2 text-xs text-text-secondary">
+                      Limite disponível: <span className="font-medium text-text-primary">{formatCurrency(availableLimit)}</span>
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="mt-4 border-t border-border-subtle pt-3">
