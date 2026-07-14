@@ -8,9 +8,10 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Badge, STATUS_BADGE } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { MonthNav } from "@/components/dashboard/MonthNav";
 import { CardForm, type CardFormInitialValues } from "@/components/cards/CardForm";
 import { deleteCard } from "@/actions/cards";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDate, MONTH_NAMES } from "@/lib/format";
 import type { Card } from "@/types/database";
 
 interface LinkedExpense {
@@ -29,12 +30,16 @@ export function CartoesClient({
   isAdmin,
   expensesByCard,
   personOptions,
+  month,
+  year,
 }: {
   cards: Card[];
   accounts: { id: string; name: string }[];
   isAdmin: boolean;
   expensesByCard: Record<string, LinkedExpense[]>;
   personOptions: { value: string; label: string }[];
+  month: number;
+  year: number;
 }) {
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
@@ -48,15 +53,18 @@ export function CartoesClient({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-text-primary">Cartões</h1>
-          <p className="text-sm text-text-secondary">Limite, fatura atual e gastos vinculados do mês.</p>
+          <p className="text-sm text-text-secondary">
+            Limite, fatura e gastos vinculados de {MONTH_NAMES[month - 1]} de {year}.
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Dropdown
             value={person}
             onChange={setPerson}
             ariaLabel="Pessoa"
             options={[{ value: "all", label: "Todas as pessoas" }, ...personOptions]}
           />
+          <MonthNav month={month} year={year} />
           {isAdmin ? (
             <Button
               onClick={() => {
@@ -135,11 +143,11 @@ export function CartoesClient({
 
                 <div className="mt-4 border-t border-border-subtle pt-3">
                   <p className="mb-2 text-xs font-medium uppercase tracking-wide text-text-secondary">
-                    Gastos vinculados este mês
+                    Gastos vinculados
                   </p>
                   {linked.length === 0 ? (
                     <p className="text-sm text-text-secondary">
-                      {person === "all" ? "Nenhum gasto neste mês." : "Nenhum gasto dessa pessoa neste mês."}
+                      {person === "all" ? "Nenhum gasto neste período." : "Nenhum gasto dessa pessoa neste período."}
                     </p>
                   ) : (
                     <ul className="flex flex-col gap-2">

@@ -3,12 +3,19 @@ import { createClient } from "@/lib/supabase/server";
 import { monthRange } from "@/lib/format";
 import { CartoesClient } from "./CartoesClient";
 
-export default async function CartoesPage() {
+export default async function CartoesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string; year?: string }>;
+}) {
   const profile = await requireProfile();
   const supabase = await createClient();
+  const params = await searchParams;
 
-  const now = new Date();
-  const { startISO, endISO } = monthRange(now.getMonth() + 1, now.getFullYear());
+  const today = new Date();
+  const month = Number(params.month) || today.getMonth() + 1;
+  const year = Number(params.year) || today.getFullYear();
+  const { startISO, endISO } = monthRange(month, year);
 
   const [{ data: cards }, { data: accounts }, { data: expenses }, { data: installments }, { data: members }] =
     await Promise.all([
@@ -79,6 +86,8 @@ export default async function CartoesPage() {
       personOptions={(members ?? [])
         .filter((m) => m.status === "active")
         .map((m) => ({ value: m.user_id, label: m.name }))}
+      month={month}
+      year={year}
     />
   );
 }

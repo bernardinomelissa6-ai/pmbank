@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MONTH_NAMES } from "@/lib/format";
 
 function IconChevronLeft(props: React.SVGProps<SVGSVGElement>) {
@@ -21,6 +21,7 @@ function IconChevronRight(props: React.SVGProps<SVGSVGElement>) {
 
 export function MonthNav({ month, year }: { month: number; year: number }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const now = new Date();
@@ -30,7 +31,7 @@ export function MonthNav({ month, year }: { month: number; year: number }) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("month", String(targetMonth));
     params.set("year", String(targetYear));
-    router.push(`/dashboard?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   function goPrev() {
